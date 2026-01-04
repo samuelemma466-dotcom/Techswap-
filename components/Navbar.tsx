@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ShoppingBag, Repeat, MessageCircle, Store, RefreshCw, User as UserIcon, LogOut } from 'lucide-react';
+import { ShoppingBag, Repeat, MessageCircle, Store, RefreshCw, User as UserIcon, LogOut, Wallet, Bell } from 'lucide-react';
 import { ViewState } from '../types';
 
 interface NavbarProps {
@@ -13,7 +13,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentView, setView, cartCount, onLogout }) => {
   const navItems = [
     { id: 'market', label: 'Market', icon: Store },
-    { id: 'sell', label: 'Trade-in / Sell', icon: RefreshCw }, // Renamed for clarity
+    { id: 'sell', label: 'Trade-in / Sell', icon: RefreshCw },
     { id: 'negotiations', label: 'Negotiations', icon: MessageCircle },
   ];
 
@@ -55,6 +55,23 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView, cartCount,
 
           {/* Right Icons */}
           <div className="flex items-center gap-3">
+             <button 
+                onClick={() => setView('wallet')}
+                className={`relative p-2.5 transition-colors rounded-full hover:bg-slate-100 border border-transparent hidden sm:flex ${currentView === 'wallet' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'text-slate-600'}`}
+                title="My Wallet"
+             >
+                <Wallet className="w-5 h-5" />
+             </button>
+
+             <button 
+                onClick={() => setView('notifications')}
+                className={`relative p-2.5 transition-colors rounded-full hover:bg-slate-100 border border-transparent ${currentView === 'notifications' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'text-slate-600'}`}
+                title="Notifications"
+             >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+             </button>
+
              <button 
                 onClick={() => setView('cart')}
                 className={`relative p-2.5 transition-colors rounded-full hover:bg-slate-100 border border-transparent ${currentView === 'cart' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'text-slate-600'}`}
@@ -109,11 +126,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, setView, cartCount,
           )
         })}
         <button
-            onClick={() => setView('profile')}
-            className={`p-2 rounded-xl flex flex-col items-center gap-1 ${currentView === 'profile' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
+            onClick={() => setView('wallet')}
+            className={`p-2 rounded-xl flex flex-col items-center gap-1 ${currentView === 'wallet' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
         >
-            <UserIcon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Profile</span>
+            <Wallet className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Wallet</span>
         </button>
       </div>
     </nav>

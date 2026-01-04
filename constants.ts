@@ -1,5 +1,5 @@
 
-import { Product } from './types';
+import { Product, Transaction, Notification } from './types';
 
 export const MOCK_PRODUCTS: Product[] = [
   // ==========================================
@@ -272,4 +272,18 @@ export const MOCK_USER_HISTORY: {
   { id: 'tx_3', date: '2023-11-20', type: 'swap', item: 'Tecno Spark 7', amount: 40000, status: 'Completed' },
   { id: 'tx_4', date: '2023-12-05', type: 'negotiation', item: 'PS4 Controller', amount: 0, status: 'Active' },
   { id: 'tx_5', date: '2023-12-10', type: 'viewed', item: 'MacBook Air M1', amount: 0, status: 'Pending' }
+];
+
+export const MOCK_TRANSACTIONS: Transaction[] = [
+    { id: 'TRX-8923', type: 'credit', amount: 50000, description: 'Wallet Top-up', date: 'Today, 10:23 AM', status: 'success', reference: 'PYM-99283' },
+    { id: 'TRX-8922', type: 'debit', amount: 245000, description: 'Purchase: iPhone XR', date: 'Yesterday, 4:15 PM', status: 'success', reference: 'ORD-12345' },
+    { id: 'TRX-8921', type: 'credit', amount: 40000, description: 'Swap Credit: Tecno Spark', date: '20 Nov 2023', status: 'success', reference: 'SWP-7721' },
+    { id: 'TRX-8920', type: 'debit', amount: 2000, description: 'Delivery Fee', date: '20 Nov 2023', status: 'success', reference: 'DEL-882' }
+];
+
+export const MOCK_NOTIFICATIONS: Notification[] = [
+    { id: '1', title: 'Order Shipped', message: 'Your iPhone 11 Pro Max is on the way to the hub.', time: '2 mins ago', read: false, type: 'order' },
+    { id: '2', title: 'Price Drop Alert', message: 'The MacBook Pro M1 in your wishlist just dropped by 5%.', time: '1 hour ago', read: false, type: 'alert' },
+    { id: '3', title: 'Welcome Gift', message: 'Here is a ₦2,000 coupon for your first trade.', time: '1 day ago', read: true, type: 'promo' },
+    { id: '4', title: 'Swap Valuation Ready', message: 'Your Tecno device has been valued at ₦45,000.', time: '2 days ago', read: true, type: 'system' }
 ];

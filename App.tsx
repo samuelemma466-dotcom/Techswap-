@@ -10,6 +10,10 @@ import { TechSwapGuide } from './components/TechSwapGuide';
 import { ProductDetails } from './components/ProductDetails';
 import { LandingPage } from './components/LandingPage';
 import { SellerDashboard } from './components/SellerDashboard';
+import { WelcomeScreen } from './components/WelcomeScreen'; 
+import { AuthScreen } from './components/AuthScreen'; 
+import { WalletView } from './components/WalletView'; // New
+import { NotificationCenter } from './components/NotificationCenter'; // New
 import { ToastContainer } from './components/ToastContainer';
 import { MOCK_PRODUCTS, MOCK_USER_HISTORY } from './constants';
 import { Product, ViewState, Order, UserRole, ComparisonResult, ToastNotification, OrderStatus } from './types';
@@ -34,8 +38,13 @@ const getLevenshteinDistance = (a: string, b: string): number => {
 
 const App: React.FC = () => {
   // State for User Role & View
+  const [showWelcome, setShowWelcome] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>('guest');
   const [currentView, setCurrentView] = useState<ViewState>('landing');
+  
+  // Auth State
+  const [authVisible, setAuthVisible] = useState(false);
+  const [pendingRole, setPendingRole] = useState<'buyer' | 'seller' | null>(null);
 
   // Market/Buyer State
   const [activeSwapProduct, setActiveSwapProduct] = useState<Product | null>(null);
@@ -94,15 +103,23 @@ const App: React.FC = () => {
   // --- Handlers ---
 
   const handleRoleSelection = (role: 'buyer' | 'seller') => {
-      setUserRole(role);
-      setCurrentView(role === 'buyer' ? 'market' : 'dashboard-overview');
-      addToast('success', `Welcome to TechSwap ${role === 'buyer' ? 'Market' : 'Dashboard'}`);
+      setPendingRole(role);
+      setAuthVisible(true);
+  };
+
+  const handleAuthComplete = (userData: any) => {
+      if (!pendingRole) return;
+      setAuthVisible(false);
+      setUserRole(pendingRole);
+      setCurrentView(pendingRole === 'buyer' ? 'market' : 'dashboard-overview');
+      addToast('success', `Welcome, ${userData.fullName || 'User'}!`);
   };
 
   const handleLogout = () => {
       setUserRole('guest');
       setCurrentView('landing');
       setCart([]);
+      setPendingRole(null);
       addToast('info', "Logged out successfully");
   };
 
@@ -246,7 +263,26 @@ const App: React.FC = () => {
 
   // --- RENDER LOGIC ---
 
-  // 1. Landing Page
+  // 0. Welcome Screen (Takes Precedence)
+  if (showWelcome) {
+      return <WelcomeScreen onComplete={() => setShowWelcome(false)} />;
+  }
+
+  // 1. Auth Screen (Intermediate Step)
+  if (authVisible && pendingRole) {
+      return (
+          <>
+            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <AuthScreen 
+                role={pendingRole} 
+                onComplete={handleAuthComplete} 
+                onBack={() => setAuthVisible(false)} 
+            />
+          </>
+      );
+  }
+
+  // 2. Landing Page
   if (userRole === 'guest' || currentView === 'landing') {
       return (
         <>
@@ -256,7 +292,7 @@ const App: React.FC = () => {
       );
   }
 
-  // 2. Seller Dashboard
+  // 3. Seller Dashboard
   if (userRole === 'seller') {
       return (
         <>
@@ -271,7 +307,7 @@ const App: React.FC = () => {
       );
   }
 
-  // 3. Buyer Layout (Marketplace)
+  // 4. Buyer Layout (Marketplace)
   return (
     <div className="min-h-screen bg-[#0f172a] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-green-900 via-slate-900 to-black text-slate-100 font-sans pb-20 selection:bg-green-500 selection:text-white">
       
@@ -287,7 +323,8 @@ const App: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
         
-        {/* MARKET VIEW */}
+        {/* VIEW ROUTING */}
+        
         {currentView === 'market' && (
           <div className="space-y-8 animate-in fade-in duration-500">
             {/* Search Header */}
@@ -558,6 +595,12 @@ const App: React.FC = () => {
 
         {/* PROFILE VIEW */}
         {currentView === 'profile' && <UserProfile orders={orders} onLogout={handleLogout} />}
+
+        {/* WALLET VIEW */}
+        {currentView === 'wallet' && <WalletView />}
+
+        {/* NOTIFICATIONS VIEW */}
+        {currentView === 'notifications' && <NotificationCenter />}
 
       </main>
 

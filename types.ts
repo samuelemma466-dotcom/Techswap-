@@ -52,6 +52,8 @@ export type ViewState =
   | 'sell' 
   | 'cart' 
   | 'profile' 
+  | 'wallet'
+  | 'notifications'
   | 'dashboard-overview' 
   | 'dashboard-inventory' 
   | 'dashboard-orders';
@@ -142,4 +144,24 @@ export interface ToastNotification {
     id: string;
     type: 'success' | 'error' | 'info';
     message: string;
+}
+
+// --- NEW SYSTEM TYPES ---
+export interface Transaction {
+    id: string;
+    type: 'credit' | 'debit';
+    amount: number;
+    description: string;
+    date: string;
+    status: 'success' | 'pending' | 'failed';
+    reference: string;
+}
+
+export interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    time: string;
+    read: boolean;
+    type: 'order' | 'promo' | 'system' | 'alert';
 }
