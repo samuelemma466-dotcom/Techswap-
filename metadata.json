@@ -1,0 +1,9 @@
+{
+  "name": "Copy of TechSwap AI",
+  "description": "A smart device trading platform allowing users to Buy, Sell, and Swap devices. Features AI-powered trade-in valuation, price negotiation, and dynamic delivery fee calculation.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
