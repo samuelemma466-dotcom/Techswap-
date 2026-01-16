@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircleQuestion, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 import { chatWithAssistant } from '../services/geminiService';
 import { Product } from '../types';
 
@@ -106,7 +107,7 @@ export const TechSwapGuide: React.FC<TechSwapGuideProps> = ({ products }) => {
             isOpen ? 'bg-slate-200 text-slate-600' : 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white'
          }`}
       >
-         {isOpen ? <X className="w-6 h-6" /> : <MessageCircleQuestion className="w-7 h-7" />}
+         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-7 h-7" />}
       </button>
     </div>
   );

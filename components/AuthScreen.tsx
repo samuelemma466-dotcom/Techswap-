@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { User, Lock, Mail, Store, ArrowRight, ArrowLeft, Loader2, MapPin, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { Button } from './Button';
+import { logSecurityEvent, sanitizeInput } from '../services/geminiService';
 
 interface AuthScreenProps {
     role: 'buyer' | 'seller';
@@ -27,12 +28,19 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ role, onComplete, onBack
     const themeBg = isSeller ? 'bg-indigo-600' : 'bg-teal-600';
     const themeBorder = isSeller ? 'focus:ring-indigo-500' : 'focus:ring-teal-500';
 
+    const handleInputChange = (field: string, value: string) => {
+        // Sanitize input in real-time for security
+        setFormData(prev => ({ ...prev, [field]: sanitizeInput(value) }));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         // Mock API call simulation
         setTimeout(() => {
             setIsLoading(false);
+            // Log security event
+            logSecurityEvent(`${mode === 'login' ? 'Login' : 'Signup'} successful: ${formData.email}`, 'success');
             onComplete(formData);
         }, 1500);
     };
@@ -126,7 +134,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ role, onComplete, onBack
                                             placeholder="Chinedu Okeke"
                                             className={`w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 ${themeBorder} transition-all`}
                                             value={formData.fullName}
-                                            onChange={e => setFormData({...formData, fullName: e.target.value})}
+                                            onChange={e => handleInputChange('fullName', e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -142,7 +150,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ role, onComplete, onBack
                                                 placeholder="Emeka Gadgets Ltd"
                                                 className={`w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 ${themeBorder} transition-all`}
                                                 value={formData.storeName}
-                                                onChange={e => setFormData({...formData, storeName: e.target.value})}
+                                                onChange={e => handleInputChange('storeName', e.target.value)}
                                             />
                                         </div>
                                     </div>
@@ -158,7 +166,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ role, onComplete, onBack
                                             placeholder={isSeller ? "Computer Village, Ikeja" : "Lekki Phase 1, Lagos"}
                                             className={`w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 ${themeBorder} transition-all`}
                                             value={formData.location}
-                                            onChange={e => setFormData({...formData, location: e.target.value})}
+                                            onChange={e => handleInputChange('location', e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -175,7 +183,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ role, onComplete, onBack
                                     placeholder="you@example.com"
                                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 ${themeBorder} transition-all`}
                                     value={formData.email}
-                                    onChange={e => setFormData({...formData, email: e.target.value})}
+                                    onChange={e => handleInputChange('email', e.target.value)}
                                 />
                             </div>
                         </div>
@@ -190,7 +198,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ role, onComplete, onBack
                                     placeholder="••••••••"
                                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 ${themeBorder} transition-all`}
                                     value={formData.password}
-                                    onChange={e => setFormData({...formData, password: e.target.value})}
+                                    onChange={e => handleInputChange('password', e.target.value)}
                                 />
                             </div>
                         </div>

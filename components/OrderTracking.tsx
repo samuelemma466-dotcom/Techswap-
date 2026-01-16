@@ -126,7 +126,7 @@ export const OrderTracking: React.FC<OrderTrackingProps> = ({ order, onClose }) 
                                      isActive ? 'border-indigo-500 text-indigo-600 shadow-md scale-110' : 
                                      isCompleted ? 'border-teal-500 text-teal-600' : 'border-slate-200 text-slate-300'
                                  }`}>
-                                     {getStepIcon(step.status)}
+                                     {getStepIcon(step.status as OrderStatus)}
                                  </div>
                                  <div className="pt-2">
                                      <h4 className={`font-bold text-sm ${isActive ? 'text-indigo-700' : 'text-slate-900'}`}>{step.label}</h4>

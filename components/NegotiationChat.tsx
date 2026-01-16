@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, DollarSign, X, User, Bot, Settings2, Mic, MicOff, Loader2, Globe, Check } from 'lucide-react';
+import { Send, DollarSign, X, User, Bot, Settings2, Mic, MicOff, Loader2, Globe, Check, AlertTriangle } from 'lucide-react';
 import { Product, Message } from '../types';
-import { generateNegotiationReply, transcribeAudio, translateText } from '../services/geminiService';
+import { generateNegotiationReply, transcribeAudio, translateText, sanitizeInput } from '../services/geminiService';
 
 interface NegotiationChatProps {
   product: Product;
@@ -23,6 +23,7 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
   const [isTyping, setIsTyping] = useState(false);
   const [aiTone, setAiTone] = useState<'friendly' | 'firm' | 'neutral'>('friendly');
   const [language, setLanguage] = useState('English');
+  const [error, setError] = useState<string | null>(null); // New Error State
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Audio Recording State
@@ -37,7 +38,7 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping]);
+  }, [messages, isTyping, error]);
 
   // Translate initial message if language changes
   useEffect(() => {
@@ -107,15 +108,18 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
   const handleSend = async () => {
     if (!inputText.trim()) return;
 
+    setError(null); // Clear previous errors
+    const sanitizedText = sanitizeInput(inputText); // SANITIZE INPUT
+
     const userMsg: Message = {
       id: Date.now().toString(),
       sender: 'buyer',
-      text: inputText,
+      text: sanitizedText,
       timestamp: Date.now()
     };
     
     // Check for offer logic using Regex to find numbers
-    const offerMatch = inputText.replace(/,/g, '').match(/(\d+)/);
+    const offerMatch = sanitizedText.replace(/,/g, '').match(/(\d+)/);
     if (offerMatch) {
         const amount = parseInt(offerMatch[0]);
         // Simple heuristic: if number is > 1000, assume it's an offer in Naira
@@ -136,10 +140,11 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
     }));
     history.push({ role: 'user', text: userMsg.text });
 
-    setTimeout(async () => {
+    try {
         let replyText = "";
         let accepted = false;
 
+        // Note: Actual logic happens in service, rate limit errors thrown there
         if (userMsg.isOffer && userMsg.offerAmount) {
              const result = await generateNegotiationReply(history, userMsg.offerAmount, product.price, aiTone);
              replyText = result.text;
@@ -169,7 +174,14 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
             setTimeout(() => onSuccess(userMsg.offerAmount!), 2000);
         }
 
-    }, 1500);
+    } catch (err: any) {
+        setIsTyping(false);
+        if (err.message && err.message.includes("Rate limit")) {
+            setError(err.message);
+        } else {
+            setError("Connection issue. Please try again.");
+        }
+    }
   };
 
   return (
@@ -273,6 +285,17 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
                  </div>
              </div>
           )}
+
+          {/* Rate Limit Error Message */}
+          {error && (
+              <div className="flex justify-center animate-in zoom-in-95">
+                  <div className="bg-red-50 text-red-600 text-xs px-4 py-2 rounded-full border border-red-200 shadow-sm flex items-center gap-2">
+                      <AlertTriangle className="w-3 h-3" />
+                      {error}
+                  </div>
+              </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
 
@@ -285,13 +308,17 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder={`Type your offer in ${language}...`}
-                    disabled={isRecording || isTranscribing}
-                    className="w-full p-3 pr-10 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm disabled:opacity-60"
+                    placeholder={error ? "Wait before sending..." : `Type your offer in ${language}...`}
+                    disabled={isRecording || isTranscribing || !!error}
+                    className={`w-full p-3 pr-10 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm disabled:opacity-60 ${
+                        error 
+                        ? 'border-red-300 focus:ring-red-500 bg-red-50' 
+                        : 'border-slate-200 focus:ring-indigo-500 focus:bg-white'
+                    }`}
                 />
                 <button
                     onClick={handleMicClick}
-                    disabled={isTranscribing}
+                    disabled={isTranscribing || !!error}
                     className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${
                         isRecording 
                         ? 'bg-red-50 text-red-500 animate-pulse' 
@@ -312,7 +339,7 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({ product, onClo
             
             <button 
                 onClick={handleSend}
-                disabled={!inputText.trim() || isRecording || isTranscribing}
+                disabled={!inputText.trim() || isRecording || isTranscribing || !!error}
                 className="bg-indigo-600 text-white p-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center"
             >
               <Send className="w-5 h-5" />

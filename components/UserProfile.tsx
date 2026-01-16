@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
-import { Package, MapPin, Heart, Settings, LogOut, Truck, CreditCard, ChevronRight, User, Bell } from 'lucide-react';
-import { Order, Product } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Package, MapPin, Heart, Settings, LogOut, Truck, CreditCard, ChevronRight, User, Bell, Plus, X, Shield, Activity, Lock, AlertOctagon } from 'lucide-react';
+import { Order, SecurityLog } from '../types';
 import { Button } from './Button';
 import { MOCK_PRODUCTS } from '../constants';
 import { OrderTracking } from './OrderTracking';
+import { getSecurityLogs } from '../services/geminiService';
 
 interface UserProfileProps {
     orders: Order[];
@@ -16,6 +17,13 @@ const MOCK_WISHLIST = MOCK_PRODUCTS.slice(2, 4); // Simulate saved items
 export const UserProfile: React.FC<UserProfileProps> = ({ orders, onLogout }) => {
   const [activeTab, setActiveTab] = useState<'orders' | 'wishlist' | 'settings'>('orders');
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
+  const [securityLogs, setSecurityLogs] = useState<SecurityLog[]>([]);
+
+  useEffect(() => {
+    if (activeTab === 'settings') {
+        getSecurityLogs().then(setSecurityLogs);
+    }
+  }, [activeTab]);
 
   const StatCard = ({ label, value, icon: Icon, color }: any) => (
     <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
@@ -187,6 +195,39 @@ export const UserProfile: React.FC<UserProfileProps> = ({ orders, onLogout }) =>
            {activeTab === 'settings' && (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-8">
                  
+                 {/* Security & Activity Log */}
+                 <div>
+                    <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                       <Shield className="w-4 h-4 text-emerald-500" /> Recent Security Activity
+                    </h3>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="p-4 bg-slate-100/50 border-b border-slate-200 flex justify-between items-center">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Audit Log</span>
+                            <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Secure</span>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                            {securityLogs.length > 0 ? securityLogs.map((log) => (
+                                <div key={log.id} className="p-3 flex items-center justify-between hover:bg-white transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${log.status === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                            {log.status === 'success' ? <Lock className="w-4 h-4" /> : <AlertOctagon className="w-4 h-4" />}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-800">{log.event}</p>
+                                            <p className="text-xs text-slate-500">{log.ip} • {log.device}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs text-slate-400">{log.timestamp}</span>
+                                </div>
+                            )) : (
+                                <div className="p-8 text-center text-slate-400 text-sm">No activity recorded yet.</div>
+                            )}
+                        </div>
+                    </div>
+                 </div>
+
+                 <div className="h-px bg-slate-100"></div>
+
                  {/* Shipping Address */}
                  <div>
                     <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -229,7 +270,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ orders, onLogout }) =>
                  {/* Security */}
                  <div>
                     <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                       <User className="w-4 h-4 text-indigo-500" /> Account Security
+                       <User className="w-4 h-4 text-indigo-500" /> Account Settings
                     </h3>
                     <Button variant="outline" className="w-full justify-between text-slate-600">
                        Change Password <ChevronRight className="w-4 h-4" />
@@ -253,26 +294,3 @@ export const UserProfile: React.FC<UserProfileProps> = ({ orders, onLogout }) =>
     </div>
   );
 };
-
-// Icon helper for Wishlist
-function Plus(props: any) {
-  return (
-    <svg 
-      {...props} 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  )
-}
-// Icon helper for Close (reusing logic from standard imports usually, but inline for brevity in sub-components if needed, though Lucide is imported)
-import { X } from 'lucide-react';

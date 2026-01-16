@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { MapPin, Truck, Clock, Loader2, AlertCircle } from 'lucide-react';
-import { calculateDeliveryQuotes } from '../services/geminiService';
+import { calculateDeliveryQuotes, secureSaveAddress } from '../services/geminiService';
 import { AiDeliveryQuote } from '../types';
 
 interface DeliveryCalculatorProps {
@@ -27,7 +27,13 @@ export const DeliveryCalculator: React.FC<DeliveryCalculatorProps> = ({ sellerLo
     setSelectedQuoteIndex(null);
     
     try {
+        // Step 1: Securely save the user's address (Encrypted at rest simulation)
+        // In a real app, this would use the current logged-in user ID
+        await secureSaveAddress("current_user_id", locationInput);
+
+        // Step 2: Fetch Quotes from Secure Backend
         const results = await calculateDeliveryQuotes(sellerLocation, locationInput);
+        
         if (results.length === 0) throw new Error("No routes found");
         setQuotes(results);
     } catch (e) {

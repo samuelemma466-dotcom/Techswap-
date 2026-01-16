@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Camera, ArrowRight, RefreshCw, X, Check, Info, ArrowRightLeft } from 'lucide-react';
+import { Camera, ArrowRight, RefreshCw, X, Check, Info, ArrowRightLeft, Smartphone, Battery, Monitor, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { Product, SwapAssessment } from '../types';
 import { analyzeSwapParams } from '../services/geminiService';
 import { Button } from './Button';
@@ -12,7 +12,7 @@ interface SwapModalProps {
 }
 
 export const SwapModal: React.FC<SwapModalProps> = ({ targetProduct, onClose, onAddToCart }) => {
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Input, 2: Analyzing, 3: Result
+  const [step, setStep] = useState<1 | 2 | 3>(1); 
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const [assessment, setAssessment] = useState<SwapAssessment | null>(null);
@@ -32,8 +32,6 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetProduct, onClose, on
   const handleAnalyze = async () => {
     if (!image) return;
     setStep(2);
-    
-    // Remove data:image/...;base64, header for the API
     const base64Data = image.split(',')[1];
     
     try {
@@ -153,7 +151,7 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetProduct, onClose, on
               </div>
               <div className="text-center space-y-3 max-w-sm mx-auto">
                 <h3 className="text-2xl font-bold text-slate-800">Analyzing Device</h3>
-                <p className="text-slate-500">Our AI is checking condition, comparing Nigerian market rates, and calculating the best trade-in value.</p>
+                <p className="text-slate-500">Our AI is checking for cracks, grading the body, and comparing with 50+ local stores.</p>
               </div>
             </div>
           )}
@@ -162,44 +160,47 @@ export const SwapModal: React.FC<SwapModalProps> = ({ targetProduct, onClose, on
           {step === 3 && assessment && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               
-              {/* Visual Swap Comparison */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6 relative">
-                 <div className="flex items-center justify-between relative z-10">
-                    {/* User Item */}
-                    <div className="flex flex-col items-center w-1/3 text-center">
-                       <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-indigo-200 shadow-md relative mb-3 bg-white">
-                          <img src={image!} className="w-full h-full object-cover" alt="Your Device" />
-                          <div className="absolute bottom-0 inset-x-0 bg-indigo-600/90 text-white text-[10px] font-bold py-1 px-2 uppercase tracking-wide">
-                            {assessment.estimatedCondition}
-                          </div>
-                       </div>
-                       <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Your Device</p>
-                       <p className="text-lg font-bold text-green-600">+₦{assessment.tradeInValue.toLocaleString()}</p>
-                    </div>
-
-                    {/* Swap Icon */}
-                    <div className="flex flex-col items-center justify-center w-1/3">
-                        <div className="w-12 h-12 bg-white rounded-full shadow-sm border border-slate-200 flex items-center justify-center text-slate-400 mb-2">
-                           <ArrowRightLeft className="w-5 h-5" />
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest">Exchange</p>
-                    </div>
-
-                    {/* Target Item */}
-                    <div className="flex flex-col items-center w-1/3 text-center">
-                       <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden border-2 border-slate-200 shadow-md relative mb-3 bg-white">
-                          <img src={targetProduct.image} className="w-full h-full object-cover" alt="Target" />
-                       </div>
-                       <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Target</p>
-                       <p className="text-lg font-bold text-slate-900">-₦{targetProduct.price.toLocaleString()}</p>
-                    </div>
-                 </div>
+              {/* Grading Breakdown */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                      <Monitor className="w-5 h-5 mx-auto text-indigo-500 mb-1" />
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Screen</p>
+                      <p className="text-sm font-bold text-slate-800">{assessment.breakdown?.screen || 'N/A'}</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                      <Smartphone className="w-5 h-5 mx-auto text-indigo-500 mb-1" />
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Body</p>
+                      <p className="text-sm font-bold text-slate-800">{assessment.breakdown?.body || 'N/A'}</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                      <Battery className="w-5 h-5 mx-auto text-indigo-500 mb-1" />
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Battery</p>
+                      <p className="text-sm font-bold text-slate-800">{assessment.breakdown?.battery || 'N/A'}</p>
+                  </div>
               </div>
+
+              {/* Guardrail Status Badge */}
+              {assessment.verificationStatus === 'adjusted' && (
+                  <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex gap-3 items-center">
+                      <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                      <div className="text-sm">
+                          <p className="font-bold text-amber-800">Valuation Cap Applied</p>
+                          <p className="text-amber-700 text-xs">Our AI detected a high-value anomaly and applied safe market limits.</p>
+                      </div>
+                  </div>
+              )}
 
               {/* Analysis & Breakdown */}
               <div className="grid md:grid-cols-2 gap-4">
                  <div className="bg-white border border-slate-100 p-4 rounded-xl shadow-sm">
-                    <h4 className="font-semibold text-slate-800 mb-3 text-sm">AI Valuation Report</h4>
+                    <div className="flex justify-between items-start mb-3">
+                         <h4 className="font-semibold text-slate-800 text-sm">AI Valuation Report</h4>
+                         {assessment.verificationStatus === 'verified' && (
+                             <div className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                                 <ShieldCheck className="w-3 h-3" /> Verified Safe
+                             </div>
+                         )}
+                    </div>
                     <div className="space-y-2 text-sm">
                        <div className="flex justify-between">
                           <span className="text-slate-500">Market Value</span>

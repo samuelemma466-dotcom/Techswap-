@@ -1,10 +1,12 @@
 
-import React from 'react';
-import { Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, ShieldCheck, Plus, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, History, CreditCard, ShieldCheck, Plus, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { Button } from './Button';
 import { MOCK_TRANSACTIONS } from '../constants';
 
 export const WalletView: React.FC = () => {
+    const [balanceVisible, setBalanceVisible] = useState(false);
+
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 pb-12">
             
@@ -22,10 +24,20 @@ export const WalletView: React.FC = () => {
                 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                     <div>
-                        <p className="text-indigo-200 font-medium mb-1 flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4" /> TechSwap Secure Balance
-                        </p>
-                        <h2 className="text-5xl font-extrabold tracking-tight mb-2">₦84,500.00</h2>
+                        <div className="flex items-center gap-3 mb-1">
+                            <p className="text-indigo-200 font-medium flex items-center gap-2">
+                                <ShieldCheck className="w-4 h-4" /> TechSwap Secure Balance
+                            </p>
+                            <button 
+                                onClick={() => setBalanceVisible(!balanceVisible)}
+                                className="text-indigo-200 hover:text-white transition-colors p-1 rounded-md hover:bg-white/10"
+                            >
+                                {balanceVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
+                        <h2 className="text-5xl font-extrabold tracking-tight mb-2">
+                            {balanceVisible ? '₦84,500.00' : '••••••••'}
+                        </h2>
                         <p className="text-sm opacity-80 font-mono">**** **** **** 4289</p>
                     </div>
 
@@ -48,7 +60,9 @@ export const WalletView: React.FC = () => {
                     </div>
                     <div>
                         <p className="text-slate-400 text-sm">Total In (Credits)</p>
-                        <p className="text-2xl font-bold text-white">₦145,000</p>
+                        <p className="text-2xl font-bold text-white">
+                            {balanceVisible ? '₦145,000' : '••••••'}
+                        </p>
                     </div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center gap-4">
@@ -57,7 +71,9 @@ export const WalletView: React.FC = () => {
                     </div>
                     <div>
                         <p className="text-slate-400 text-sm">Total Out (Spent)</p>
-                        <p className="text-2xl font-bold text-white">₦60,500</p>
+                        <p className="text-2xl font-bold text-white">
+                            {balanceVisible ? '₦60,500' : '••••••'}
+                        </p>
                     </div>
                 </div>
             </div>

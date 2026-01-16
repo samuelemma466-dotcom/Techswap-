@@ -5,26 +5,36 @@ export interface Product {
   description: string;
   price: number;
   image: string;
-  category: 'Phone' | 'Laptop' | 'Tablet' | 'Watch' | 'Audio' | 'Gaming' | 'Camera' | 'Drone' | 'Smart Home';
-  condition: 'Mint' | 'Good' | 'Fair' | 'Poor';
+  category: 'Phone' | 'Laptop' | 'Tablet' | 'Watch' | 'Audio' | 'Gaming';
+  condition: 'Grade A' | 'Grade B' | 'Grade C' | 'Refurbished';
   location: string;
   sellerId: string;
   sellerName: string;
-  sellerReputation: number;
-  marketBadge?: string;
-  // New Fields for Professional Sellers
+  sellerTrustScore: number; // 0-100
+  isVerified: boolean;
   stock: number;
   sku?: string;
   status: 'active' | 'draft' | 'archived';
+  views?: number;
+  verificationId?: string;
+  aiPricingSuggestion?: {
+      price: number;
+      confidence: number;
+  };
 }
 
-export interface SwapAssessment {
-  estimatedCondition: string;
+export interface TrustScanResult {
+  deviceModel: string;
+  conditionGrade: 'A' | 'B' | 'C' | 'D';
+  confidenceScore: number; // 0-100
   marketValue: number;
-  tradeInValue: number;
-  topUpAmount: number;
-  reasoning: string;
-  sellerProfitMargin: number;
+  verificationNotes: string;
+  visualAnalysis: {
+    screen: 'Clean' | 'Scratched' | 'Cracked';
+    body: 'Mint' | 'Dented' | 'Worn';
+    camera: 'Clear' | 'Obstructed';
+  };
+  isEligibleForListing: boolean;
 }
 
 export interface Message {
@@ -36,20 +46,12 @@ export interface Message {
   offerAmount?: number;
 }
 
-export interface Negotiation {
-  id: string;
-  productId: string;
-  messages: Message[];
-  status: 'active' | 'accepted' | 'rejected';
-}
-
 export type UserRole = 'guest' | 'buyer' | 'seller';
 
-// Updated ViewState to handle specific dashboard views
 export type ViewState = 
   | 'landing' 
   | 'market' 
-  | 'sell' 
+  | 'trust-scan' 
   | 'cart' 
   | 'profile' 
   | 'wallet'
@@ -58,62 +60,42 @@ export type ViewState =
   | 'dashboard-inventory' 
   | 'dashboard-orders';
 
-// --- SELLER DASHBOARD TYPES ---
-export interface DashboardMetrics {
-    totalRevenue: number;
-    activeListings: number;
-    pendingOrders: number;
-    sellerRating: number;
-    monthlyGrowth: number; // Percentage
-}
-
-export interface Promotion {
-    id: string;
-    code: string;
-    discountType: 'percentage' | 'fixed';
-    value: number;
-    usageCount: number;
-    status: 'active' | 'expired';
-}
-
-export interface StoreProfile {
-    storeName: string;
-    description: string;
-    logoUrl: string;
-    bannerUrl: string;
-    contactEmail: string;
-    pickupAddress: string;
-}
-
-// --- LOGISTICS TYPES ---
-
-export type OrderStatus = 'processing' | 'pickup_scheduled' | 'in_transit_to_hub' | 'at_hub_verification' | 'verified' | 'out_for_delivery' | 'delivered';
-
-export interface TrackingStep {
-  status: OrderStatus;
-  label: string;
-  timestamp?: string;
-  location?: string;
-  icon?: string;
-  completed: boolean;
-}
+export type OrderStatus = 'escrow_locked' | 'processing' | 'shipped' | 'delivered' | 'funds_released' | 'pickup_scheduled' | 'in_transit_to_hub' | 'at_hub_verification' | 'verified' | 'out_for_delivery';
 
 export interface Order {
   id: string;
-  items: { product: Product, isSwap: boolean }[];
+  items: { product: Product, price: number, isSwap?: boolean }[];
   totalAmount: number;
   date: string;
   status: OrderStatus;
-  estimatedArrival: string;
   trackingSteps: TrackingStep[];
+  trustVerificationId?: string;
+  estimatedArrival?: string;
   verificationReport?: string;
 }
 
+export interface TrackingStep {
+  status: string;
+  label: string;
+  timestamp?: string;
+  completed: boolean;
+  location?: string;
+}
+
 // --- AI SERVICE TYPES ---
-export interface AiMarketAnalysis {
-    trend: 'up' | 'down' | 'stable';
+export interface MarketPulseData {
+    valueScore: number; // 0-100 (Is this a good deal?)
+    fairPriceRange: { min: number, max: number };
+    priceTrend: 'rising' | 'falling' | 'stable';
+    demandLevel: 'high' | 'medium' | 'low';
     insight: string;
-    specs: { label: string, value: string }[];
+}
+
+export interface DealSenseReply {
+    text: string;
+    accepted: boolean;
+    counterOffer?: number;
+    toneUsed: string;
 }
 
 export interface AiDeliveryQuote {
@@ -121,6 +103,48 @@ export interface AiDeliveryQuote {
     service: string;
     cost: number;
     estimatedDays: string;
+    trustRating: string; // "High Trust"
+    reasoning?: string;
+}
+
+export interface SecurityLog {
+    id: string;
+    event: string;
+    timestamp: string;
+    status: 'success' | 'warning' | 'failed';
+    ip?: string;
+    device?: string;
+}
+
+export interface ToastNotification {
+    id: string;
+    type: 'success' | 'error' | 'info';
+    message: string;
+    read?: boolean;
+    title?: string;
+    time?: string;
+}
+
+export interface Transaction {
+    id: string;
+    type: 'credit' | 'debit' | 'escrow_lock' | 'escrow_release';
+    amount: number;
+    description: string;
+    date: string;
+    status: 'success' | 'pending' | 'failed';
+    reference?: string;
+}
+
+export interface SwapAssessment {
+    marketValue: number;
+    tradeInValue: number;
+    topUpAmount: number;
+    breakdown: {
+        screen: string;
+        body: string;
+        battery: string;
+    };
+    verificationStatus: 'verified' | 'adjusted' | 'pending';
     reasoning: string;
 }
 
@@ -130,38 +154,27 @@ export interface AiSellerInsight {
     actionableTip: string;
 }
 
-export interface ComparisonResult {
-    winnerId: string;
-    summary: string;
-    specs: {
-        label: string;
-        item1Value: string;
-        item2Value: string;
-    }[];
+export interface Promotion {
+    id: string;
+    code: string;
+    discountType: 'percentage' | 'fixed';
+    value: number;
+    usageCount: number;
+    status: 'active' | 'expired' | 'scheduled';
 }
 
-export interface ToastNotification {
-    id: string;
-    type: 'success' | 'error' | 'info';
-    message: string;
-}
-
-// --- NEW SYSTEM TYPES ---
-export interface Transaction {
-    id: string;
-    type: 'credit' | 'debit';
-    amount: number;
+export interface StoreProfile {
+    storeName: string;
     description: string;
-    date: string;
-    status: 'success' | 'pending' | 'failed';
-    reference: string;
+    logoUrl: string;
+    bannerUrl: string;
+    contactEmail: string;
+    pickupAddress: string;
+    sellerTrustGrade: 'A' | 'B' | 'C';
 }
 
-export interface Notification {
-    id: string;
-    title: string;
-    message: string;
-    time: string;
-    read: boolean;
-    type: 'order' | 'promo' | 'system' | 'alert';
+export interface AiPricingAdvice {
+    recommendedPrice: number;
+    priceRange: { min: number, max: number };
+    confidence: number;
 }

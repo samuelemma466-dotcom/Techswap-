@@ -1,6 +1,6 @@
 {
-  "name": "Copy of TechSwap AI",
-  "description": "A smart device trading platform allowing users to Buy, Sell, and Swap devices. Features AI-powered trade-in valuation, price negotiation, and dynamic delivery fee calculation.",
+  "name": "GadgetTrust AI",
+  "description": "Buy, sell, and trade gadgets with AI-powered trust. Features TrustScan verification, DealSense negotiation, and Escrow payments.",
   "requestFramePermissions": [
     "camera",
     "microphone",
