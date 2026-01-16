@@ -17,7 +17,9 @@ export const MOCK_PRODUCTS: Product[] = [
     isVerified: true,
     stock: 3,
     status: 'active',
-    views: 1240
+    views: 1240,
+    demandLevel: 'High',
+    estimatedDaysToSell: 3
   },
   {
     id: 'macbook-air-m1',
@@ -34,7 +36,9 @@ export const MOCK_PRODUCTS: Product[] = [
     isVerified: true,
     stock: 1,
     status: 'active',
-    views: 890
+    views: 890,
+    demandLevel: 'Medium',
+    estimatedDaysToSell: 7
   },
   {
     id: 'ps5-console',
@@ -51,7 +55,9 @@ export const MOCK_PRODUCTS: Product[] = [
     isVerified: true,
     stock: 5,
     status: 'active',
-    views: 2100
+    views: 2100,
+    demandLevel: 'High',
+    estimatedDaysToSell: 2
   },
   {
     id: 'samsung-s23',
@@ -68,7 +74,9 @@ export const MOCK_PRODUCTS: Product[] = [
     isVerified: false, // Pending verification
     stock: 1,
     status: 'active',
-    views: 450
+    views: 450,
+    demandLevel: 'Medium',
+    estimatedDaysToSell: 10
   }
 ];
 

@@ -21,6 +21,8 @@ export interface Product {
       price: number;
       confidence: number;
   };
+  demandLevel?: 'High' | 'Medium' | 'Low';
+  estimatedDaysToSell?: number;
 }
 
 export interface TrustScanResult {
